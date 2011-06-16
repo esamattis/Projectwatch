@@ -5,36 +5,47 @@ fs = require "fs"
 
 watch = require "watch"
 gex = require "gex"
-findit = require("findit")
+findit = require "findit"
+iniparser = require "iniparser"
 
-# dirs =  process.argv.splice(2)
 
 class Watcher
 
-  constructor: (@dir, @settings) ->
+  constructor: (@name, @cwd, @settings) ->
+    @settings.glob ||= "*"
+    @settings.watchdir ||= "."
+
+    if @settings.watchdir.substr(0,1) isnt "/"
+      @settings.watchdir = path.join(@cwd, @settings.watchdir)
 
   start: ->
 
-    watch.createMonitor @dir, (monitor) =>
-      console.log "Found watch '#{ @settings.name }' from #{ @dir }"
+    watch.createMonitor @settings.watchdir, (monitor) =>
+
+      console.log "Found watch '#{ @name }' from directory #{ @settings.watchdir }"
+
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)
 
   onModified: (filepath) ->
 
-    return if not gex(@settings.match).on path.basename filepath
+    for match in @settings.glob.split(" ")
+      if gex(match).on path.basename filepath
+        ok = true
+        break
+    return unless ok
 
-    console.log "#{ filepath } changed on #{ @settings.name }"
+    console.log "#{ filepath } changed on #{ @name }"
 
     @runCMD()
 
   runCMD: ->
 
-    cmd = exec @settings.cmd,  cwd: @dir, (err) =>
+    cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
       if err
-        console.log "Error in #{ @settings.name }"
+        console.log "Error in #{ @name }"
       else
-        console.log "\nRan", @settings.name, "successfully!"
+        console.log "\nRan", @name, "successfully!"
 
     cmd.stdout.on "data", (data) -> process.stdout.write data
     cmd.stderr.on "data", (data) -> process.stderr.write data
@@ -42,25 +53,22 @@ class Watcher
 
 exports.run = ->
 
-  searchDir = process.cwd()
-
   console.log "Searching watch.json files from #{ searchDir }\n"
 
-  watchers = []
+  dirs = process.argv.splice(2)
+  dirs.push process.cwd() unless dirs.length
 
-  finder = findit.find(searchDir)
-  finder.on "file", (filepath) ->
-    if path.basename(filepath) is "watch.json"
-        fs.readFile filepath, (err, data) =>
-          throw err if err
-          settings = JSON.parse data
-          watcher = new Watcher path.dirname(filepath), settings
-          watcher.start()
-          watchers.push watcher
+  for searchDir in dirs
+    finder = findit.find(searchDir)
+    finder.on "file", (filepath) ->
+      if path.basename(filepath) is "projectwatch.cfg"
+          iniparser.parse filepath, (err, settingsObs) ->
+            throw err if err
+            for name, settings of settingsObs
+              watcher = new Watcher name, path.dirname(filepath), settings
+              watcher.start()
+              watcher.runCMD()
 
-  finder.on "end", ->
-    console.log "\nInitially running commands"
-    for w in watchers
-      w.runCMD()
+
 
 
