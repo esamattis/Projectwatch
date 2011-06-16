@@ -1,6 +1,0 @@
-{
-    "name": "My project scss"
-    , "dir": "./scss"
-    , "match": "*.scss"
-    , "cmd": "compass compile --css-dir css/ --sass-dir scss/"
-}
