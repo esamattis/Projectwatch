@@ -18,6 +18,9 @@ class Watcher
     if @settings.watchdir.substr(0,1) isnt "/"
       @settings.watchdir = path.join(@cwd, @settings.watchdir)
 
+    @rerun = false
+    @running = false
+
   start: ->
 
     watch.createMonitor @settings.watchdir, (monitor) =>
@@ -35,17 +38,32 @@ class Watcher
         break
     return unless ok
 
-    console.log "#{ filepath } changed on #{ @name }"
 
-    @runCMD()
+    # Oh we are already running. Just request restart for this change.
+    if @running
+      @rerun = true
+    else
+      @runCMD()
+
+
+    console.log "Change on '#{ filepath }' running '#{ @name }'!"
 
   runCMD: ->
 
+    @running = true
     cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
+      @running = false
+
       if err
-        console.log "Error in #{ @name }"
+        console.log "Error in '#{ @name }'"
+
+      if @rerun
+        # There has been a change(s) during this run. Let's rerun it.
+        console.log "Rerunning '#{ @name }'"
+        @rerun = false
+        @runCMD()
       else
-        console.log "\nRan", @name, "successfully!"
+        console.log "\nRan '#{ @name }' successfully!"
 
     cmd.stdout.on "data", (data) -> process.stdout.write data
     cmd.stderr.on "data", (data) -> process.stderr.write data
