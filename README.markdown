@@ -55,7 +55,26 @@ Install [Node.js][] and [NPM][] and run
 [ini-style]: http://en.wikipedia.org/wiki/INI_file
 
 
+## Hacking
+
+Remove previous installation
+
+    npm uninstall -g projectwatch
+
+Get the code
+
+    git clone git@github.com:epeli/Projectwatch.git
+
+Link install it
+
+    cd Projectwatch
+    npm link
+
+Now projectwatch -command should use your code in the Projectwatch -directory.
+Now hack and send some cool pull requests via Github :)
+
 ## Licence
 
 GNU GENERAL PUBLIC LICENSE Version 3. See LICENCE.txt.
+
 
