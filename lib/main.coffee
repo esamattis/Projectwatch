@@ -53,7 +53,7 @@ class Watcher
 
 exports.run = ->
 
-  console.log "Searching watch.json files from #{ searchDir }\n"
+  console.log "Searching projectwatch.cfg files from #{ searchDir }\n"
 
   dirs = process.argv.splice(2)
   dirs.push process.cwd() unless dirs.length
