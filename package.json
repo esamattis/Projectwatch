@@ -1,0 +1,18 @@
+{
+    "name" : "projectwatch"
+    , "version": "0.1.0"
+    , "author": "Esa-Matti Suuronen"
+    , "main": "./index"
+    , "bin": { "projectwatch": "./bin/projectwatch" }
+    , "dependencies": {
+        "coffee-script": ""
+        , "watch": ""
+        , "findit": ""
+        , "gex": ""
+    }
+    , "devDependencies": {
+        "supervisor": ""
+    }
+}
+
+

@@ -1,0 +1,6 @@
+{
+    "name": "My project coffees"
+    , "dir": "./src"
+    , "match": "*.coffee"
+    , "cmd": "coffee --output js/ src/*"
+}
