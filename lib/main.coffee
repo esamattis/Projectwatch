@@ -63,7 +63,7 @@ class Watcher
         @rerun = false
         @runCMD()
       else
-        console.log "\nRan", @settings.name, "successfully!", (new Date) + 2*60*60
+        console.log "\nRan", @name, "successfully!", (new Date) + 2*60*60
 
     cmd.stdout.on "data", (data) -> process.stdout.write data
     cmd.stderr.on "data", (data) -> process.stderr.write data
@@ -71,10 +71,11 @@ class Watcher
 
 exports.run = ->
 
-  console.log "Searching projectwatch.cfg files from #{ searchDir }\n"
 
   dirs = process.argv.splice(2)
   dirs.push process.cwd() unless dirs.length
+
+  console.log "Searching projectwatch.cfg files from #{ dirs }\n"
 
   for searchDir in dirs
     finder = findit.find(searchDir)
