@@ -34,7 +34,7 @@ class Watcher
       if err
         console.log "Error in #{ @settings.name }"
       else
-        console.log "\nRan", @settings.name, "successfully!"
+        console.log "\nRan", @settings.name, "successfully!", (new Date) + 2*60*60
 
     cmd.stdout.on "data", (data) -> process.stdout.write data
     cmd.stderr.on "data", (data) -> process.stderr.write data
