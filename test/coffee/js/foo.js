@@ -1,3 +1,0 @@
-(function() {
-  sadf;
-}).call(this);

@@ -5,34 +5,63 @@ fs = require "fs"
 
 watch = require "watch"
 gex = require "gex"
-findit = require("findit")
+findit = require "findit"
+iniparser = require "iniparser"
 
-# dirs =  process.argv.splice(2)
 
 class Watcher
 
-  constructor: (@dir, @settings) ->
+  constructor: (@name, @cwd, @settings) ->
+    @settings.glob ||= "*"
+    @settings.watchdir ||= "."
+
+    if @settings.watchdir.substr(0,1) isnt "/"
+      @settings.watchdir = path.join(@cwd, @settings.watchdir)
+
+    @rerun = false
+    @running = false
 
   start: ->
 
-    watch.createMonitor @dir, (monitor) =>
-      console.log "Found watch '#{ @settings.name }' from #{ @dir }"
+    watch.createMonitor @settings.watchdir, (monitor) =>
+
+      console.log "Found watch '#{ @name }' from directory #{ @settings.watchdir }"
+
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)
 
   onModified: (filepath) ->
 
-    return if not gex(@settings.match).on path.basename filepath
+    for match in @settings.glob.split(" ")
+      if gex(match).on path.basename filepath
+        ok = true
+        break
+    return unless ok
 
-    console.log "#{ filepath } changed on #{ @settings.name }"
 
-    @runCMD()
+    # Oh we are already running. Just request restart for this change.
+    if @running
+      @rerun = true
+    else
+      @runCMD()
+
+
+    console.log "Change on '#{ filepath }' running '#{ @name }'!"
 
   runCMD: ->
 
-    cmd = exec @settings.cmd,  cwd: @dir, (err) =>
+    @running = true
+    cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
+      @running = false
+
       if err
-        console.log "Error in #{ @settings.name }"
+        console.log "Error in '#{ @name }'"
+
+      if @rerun
+        # There has been a change(s) during this run. Let's rerun it.
+        console.log "Rerunning '#{ @name }'"
+        @rerun = false
+        @runCMD()
       else
         console.log "\nRan", @settings.name, "successfully!", (new Date) + 2*60*60
 
@@ -42,25 +71,22 @@ class Watcher
 
 exports.run = ->
 
-  searchDir = process.cwd()
+  console.log "Searching projectwatch.cfg files from #{ searchDir }\n"
 
-  console.log "Searching watch.json files from #{ searchDir }\n"
+  dirs = process.argv.splice(2)
+  dirs.push process.cwd() unless dirs.length
 
-  watchers = []
+  for searchDir in dirs
+    finder = findit.find(searchDir)
+    finder.on "file", (filepath) ->
+      if path.basename(filepath) is "projectwatch.cfg"
+          iniparser.parse filepath, (err, settingsObs) ->
+            throw err if err
+            for name, settings of settingsObs
+              watcher = new Watcher name, path.dirname(filepath), settings
+              watcher.start()
+              watcher.runCMD()
 
-  finder = findit.find(searchDir)
-  finder.on "file", (filepath) ->
-    if path.basename(filepath) is "watch.json"
-        fs.readFile filepath, (err, data) =>
-          throw err if err
-          settings = JSON.parse data
-          watcher = new Watcher path.dirname(filepath), settings
-          watcher.start()
-          watchers.push watcher
 
-  finder.on "end", ->
-    console.log "\nInitially running commands"
-    for w in watchers
-      w.runCMD()
 
 
