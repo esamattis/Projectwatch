@@ -74,6 +74,7 @@ exports.run = ->
 
   dirs = process.argv.splice(2)
   dirs.push process.cwd() unless dirs.length
+  watchers = {}
 
   console.log "Searching projectwatch.cfg files from #{ dirs }\n"
 
@@ -87,6 +88,7 @@ exports.run = ->
               watcher = new Watcher name, path.dirname(filepath), settings
               watcher.start()
               watcher.runCMD()
+              watchers[name] = watcher
 
 
 

@@ -15,5 +15,8 @@
         , "findit": ""
         , "iniparser": ""
         , "gex": ""
+        , "express": ""
+        , "jade": ""
+        , "now": ""
     }
 }
