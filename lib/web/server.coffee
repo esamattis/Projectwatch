@@ -1,5 +1,7 @@
 
 
+{exec} = require "child_process"
+
 express = require "express"
 nowjs = require("now")
 
@@ -10,27 +12,22 @@ everyone = nowjs.initialize app
 
 app.shareUrl "/nowjs/now.js"
 
-app.exec ->
-  now.renderOutput = (watcher) ->
-    console.log "got", watcher.name
-    textarea = $("##{ watcher.name }")
-    if textarea.size() is 0
-      textarea = $("<textarea>", id: "foo").appendTo("body")
 
 
 
 
-
-
-
-setTimeout ->
-  everyone.now.renderOutput name: "myproj:compass"
-,
-  2000
-
+i = 1
 
 renderApp = (req, res) ->
   res.render "index.jade", text: "hello jade"
+  name = "myproj:compass"
+
+  cmd = exec "slow"
+
+  cmd.stdout.on "data", (data) -> process.stdout.write(data)
+  cmd.stdout.on "data", (data) ->
+    everyone.now[name].sendStdout(data)
+
 
 
 app.get "/", renderApp

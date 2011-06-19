@@ -11,25 +11,38 @@ class JQEvenEmitter
 
 
 
-i = 0
-class Watcher extends JQEvenEmitter
+class WatcherOuput
 
-  constructor: ->
-    super
-    @i = i += 1
-    console.log "building"
+  constructor: (@name, @el)  ->
+    remote = now[@name] = {}
+    remote.sendStdout =  => @pushStdout.apply @, arguments
+    remote.sendStderr =  => @pushStderr.apply @, arguments
+    remote.reset = => @reset()
 
-    @on "some", => @mymethod()
+  setExitStatus: ->
+    @title.css "color", "red"
 
-  mymethod: ->
-    console.log "got some #{ @i }"
+  pushStdout: (data) ->
+    @stdout.text @stdout.text() + data
+
+  pushStderr: (data) ->
+    @stderr.text @stderr.text() + data
+
+  reset: ->
+    @stdout.text ""
+    @stderr.text ""
+
+  render: ->
+    @title = @el.append("<h2>#{ @name }</h2>")
+    for type in ["stdout", "stderr"]
+      id = "#{ type }-#{ @name }"
+      @[type] = $("#" + id)
+      if @[type].size() is 0
+        @["#{ type }Title"] = @el.append("<h3>#{ type }</h3>")
+        @[type] = $("<textarea>", id: id).appendTo @el
 
 
+$ ->
+  w = new WatcherOuput "myproj:compass", $("body")
+  w.render()
 
-
-w = new Watcher
-w.emit "some"
-
-w2 = new Watcher
-w2.emit "some"
-w2.emit "some"
