@@ -1,6 +1,7 @@
 
 path = require "path"
 fs = require "fs"
+{ EventEmitter } = require 'events'
 {exec} = require "child_process"
 
 watch = require "watch"
@@ -9,9 +10,13 @@ findit = require "findit"
 iniparser = require "iniparser"
 
 
-class Watcher
+port = 8080
+
+class Watcher extends EventEmitter
 
   constructor: (@name, @cwd, @settings) ->
+    super
+
     @settings.glob ||= "*"
     @settings.watchdir ||= "."
 
@@ -20,6 +25,15 @@ class Watcher
 
     @rerun = false
     @running = false
+    @exitstatus = 0
+
+
+
+  resetOutputs: ->
+    @stdout = ""
+    @stderr = ""
+    @stdboth = ""
+
 
   start: ->
 
@@ -50,12 +64,24 @@ class Watcher
 
   runCMD: ->
 
+    @resetOutputs()
+    @emit "start"
+
     @running = true
     cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
       @running = false
 
       if err
-        console.log "Error in '#{ @name }'"
+        id = @name.replace /[^a-zA-z]/g, ""
+        console.log """Error in '#{ @name }'
+          details http://localhost:#{ port }/##{ id }"""
+        @exitstatus = err.code
+      else
+        @exitstatus = 0
+
+      console.log @name, "Emitting", @exitstatus
+      @emit "end", @exitstatus
+
 
       if @rerun
         # There has been a change(s) during this run. Let's rerun it.
@@ -65,16 +91,26 @@ class Watcher
       else
         console.log "\nRan", @name, "successfully!", (new Date) + 2*60*60
 
-    cmd.stdout.on "data", (data) -> process.stdout.write data
-    cmd.stderr.on "data", (data) -> process.stderr.write data
 
+    cmd.stdout.on "data", (data) =>
+      @stdout += data.toString()
+      @stdboth += data.toString()
+      @emit "stdout", data.toString()
+      @emit "stdboth", data.toString()
+
+    cmd.stderr.on "data", (data) =>
+      @stderr += data.toString()
+      @stdboth += data.toString()
+      @emit "stderr", data.toString()
+      @emit "stdboth", data.toString()
+
+
+webserver = require __dirname + "/web/server.coffee"
 
 exports.run = ->
 
-
   dirs = process.argv.splice(2)
   dirs.push process.cwd() unless dirs.length
-  watchers = {}
 
   console.log "Searching projectwatch.cfg files from #{ dirs }\n"
 
@@ -88,7 +124,11 @@ exports.run = ->
               watcher = new Watcher name, path.dirname(filepath), settings
               watcher.start()
               watcher.runCMD()
-              watchers[name] = watcher
+
+              webserver.registerWatcher watcher
+
+  webserver.start(port)
+
 
 
 

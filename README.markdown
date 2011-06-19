@@ -8,7 +8,7 @@ independent solution for all of those.
 
 You use it by defining a projectwatch.cfg file(s) to your project directories.
 In the file you define what files should be monitored and what command should
-be executed if a change is detected.
+be executed when a change is detected.
 
 Here's an example file
 
@@ -17,15 +17,21 @@ Here's an example file
     glob = *.coffee
     cmd = coffee --output js/ src/*
 
-Command
+and now command
 
     projectwatch path/to/my/project
 
 will go through every directory of your project looking for projectwatch.cfg
 files and will start monitors defined in those.
 
+## Webserver
 
-## Synopsis
+Because shells are intended for a one output only it gets very messy if you
+have several running applications on one shell. That's why Projectwatch comes
+with embedded webserver which provides a HTML based view for your task
+outputs. The view is updated instantly as your tasks are being run.
+
+## Usage
 
     projectwatch [dir1[,dir2[,...]]]
 
@@ -77,4 +83,13 @@ Now hack and send some cool pull requests via Github :)
 
 GNU GENERAL PUBLIC LICENSE Version 3. See LICENCE.txt.
 
+
+## TODOs
+
+Todos before 1.0.0
+
+- Use some nice command line option parser
+- Get rid off socket.io logging messages
+- Enable custom error detection
+- Notify about errors using HTML5 desktop notifications
 

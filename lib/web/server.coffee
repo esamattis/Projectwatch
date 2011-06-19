@@ -6,35 +6,58 @@ express = require "express"
 nowjs = require("now")
 
 { addCodeSharingTo } = require "express-share"
+
+
 app = express.createServer()
-addCodeSharingTo app
+
 everyone = nowjs.initialize app
 
+app.set "views", __dirname + "/views"
+console.log "DIR", __dirname
+
+app.use express.static(__dirname + "/public")
+app.set "clientscripts", __dirname + "/clientscripts"
+addCodeSharingTo app
 app.shareUrl "/nowjs/now.js"
 
 
-
-
-
-i = 1
+watchers = {}
 
 renderApp = (req, res) ->
-  res.render "index.jade", text: "hello jade"
-  name = "myproj:compass"
-
-  cmd = exec "slow"
-
-  cmd.stdout.on "data", (data) -> process.stdout.write(data)
-  cmd.stdout.on "data", (data) ->
-    everyone.now[name].sendStdout(data)
-
+  res.render "index.jade"
 
 
 app.get "/", renderApp
 app.get "/:name", renderApp
 
+everyone.on "connect", ->
+  ws = []
+  for name, w of watchers
+    ws.push
+      name: name
+      stdout: w.stdout
+      stderr: w.stderr
+      stdboth: w.stdboth
+      exitstatus: w.exitstatus
 
-port = 8080
+  @now.init ws
 
-app.listen port
-console.log  "Listening on  http://localhost:#{ port }/"
+exports.registerWatcher = (watcher) ->
+  watchers[watcher.name] = watcher
+
+  watcher.on "stdout", (data) ->
+    console.log "SENDING", watcher.name
+    everyone.now[watcher.name]?.sendStdout(data)
+  watcher.on "stderr", (data) ->
+    everyone.now[watcher.name]?.sendStderr(data)
+  watcher.on "stdboth", (data) ->
+    everyone.now[watcher.name]?.sendStdboth(data)
+  watcher.on "start", (data) ->
+    everyone.now[watcher.name]?.sendReset()
+  watcher.on "end", (exitstatus) ->
+    everyone.now[watcher.name]?.sendExitStatus exitstatus
+
+exports.start = (port=8080) ->
+  app.listen port
+  console.log  "Listening on  http://localhost:#{ port }/"
+

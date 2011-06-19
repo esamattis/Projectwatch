@@ -10,39 +10,148 @@ class JQEvenEmitter
   emit: ->                @_jq.trigger.apply @_jq, arguments
 
 
+class WatcherRemote extends JQEvenEmitter
 
-class WatcherOuput
+  constructor: (options) ->
+    super
+    @status = "ok"
+    @id = options.name.replace /[^a-zA-z]/g, ""
+    @name = options.name
 
-  constructor: (@name, @el)  ->
+    @lastUpdated = (new Date()).getTime()
+    @on "update", => @lastUpdated = (new Date()).getTime()
+
+    @active = false
+    @update options
+
     remote = now[@name] = {}
-    remote.sendStdout =  => @pushStdout.apply @, arguments
-    remote.sendStderr =  => @pushStderr.apply @, arguments
-    remote.reset = => @reset()
+    remote.sendStdout = (data) => 
+      @stdout += data
+      @emit "update"
+    remote.sendStderr = (data) => 
+      @stderr += data
+      @emit "update"
+    remote.sendStdboth = (data) => 
+      @stdboth += data
+      @emit "update"
 
-  setExitStatus: ->
-    @title.css "color", "red"
+    remote.sendReset = =>
+      @reset()
+      @emit "update"
 
-  pushStdout: (data) ->
-    @stdout.text @stdout.text() + data
+    remote.sendExitStatus = (exitstatus) =>
+      @setStatus exitstatus
 
-  pushStderr: (data) ->
-    @stderr.text @stderr.text() + data
+
+  setStatus: (exitstatus) ->
+      # Blueprint classes
+      if exitstatus is 0
+        @status = "success"
+      else
+        @status = "error"
+      @emit "update"
 
   reset: ->
-    @stdout.text ""
-    @stderr.text ""
+    @stdout = ""
+    @stderr = ""
+    @stdboth = ""
+
+  update: (data) ->
+    @stdout = data.stdout
+    @stderr = data.stderr
+    @stdboth = data.stdboth
+    # This will emit update
+    @setStatus data.exitstatus
+
+class WatcherView
+
+  constructor: (settings)  ->
+    @model = settings.model
+    @el = settings.el
+
+    @template = Handlebars.compile $("#watcher").html()
+
+    @model.on "update", =>
+      @render()
+
+    setInterval =>
+      diff = (new Date).getTime() - @model.lastUpdated
+      diff /= 1000
+      timer = @el.find(".timer")
+      if diff < 60 * 60
+        timer.text " Last updated #{ Math.round diff } seconds ago"
+      else
+        timer.text ""
+    , 1000
 
   render: ->
-    @title = @el.append("<h2>#{ @name }</h2>")
-    for type in ["stdout", "stderr"]
-      id = "#{ type }-#{ @name }"
-      @[type] = $("#" + id)
-      if @[type].size() is 0
-        @["#{ type }Title"] = @el.append("<h3>#{ type }</h3>")
-        @[type] = $("<textarea>", id: id).appendTo @el
+    @el.html @template @model
+
+  show: ->
+    @model.active = true
+    @model.emit "update"
+    @el.get(0).scrollIntoView(true)
+  hide: ->
+    @model.active = false
+    @model.emit "update"
+
+class WatcherManager
+
+  constructor: ->
+    @notifies = new Notifies el: $("title")
+    @watchers = {}
+
+  createWatcher: (options) ->
+    if not @watchers[options.name]?
+      model = new WatcherRemote options
+      w = @watchers[options.name] = new WatcherView
+        model: model
+        el: $("<div>").appendTo("body")
+      @notifies.add model
+    else
+      w = @watchers[options.name]
+      w.model.update options
+
+    w.render()
+
+class Notifies
+
+  constructor: (ops) ->
+    @el = ops.el
+    @models = []
+
+  add: (model) ->
+    @models.push model
+    model.on "update", => @setNotify()
+
+  setNotify: ->
+    for model in @models
+      if model.status is "error"
+        @el.text "ERROR - Projectwatch"
+        return
+    @el.text "OK - Projectwatch"
+
+manager = new WatcherManager
+
+now.init = (watchers) ->
+  $ ->
+    for w in watchers
+      manager.createWatcher w
+
+    activateWatcherByHash = ->
+      id = window.location.hash.substring(1)
+      for k, w of manager.watchers
+
+        if w.model.id is id
+          w.show()
+        else
+          w.hide()
+
+    $(window).bind "hashchange", activateWatcherByHash
+    activateWatcherByHash()
 
 
-$ ->
-  w = new WatcherOuput "myproj:compass", $("body")
-  w.render()
+
+
+
 
