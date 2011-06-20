@@ -42,7 +42,7 @@ class WatcherRemote extends JQEvenEmitter
 
     remote.sendExitStatus = (exitstatus) =>
       # Emits update
-      console.log "Got exitstatus from server", exitstatus
+      console.log "Got exitstatus from server", exitstatus, @id
       @setStatus exitstatus
 
 

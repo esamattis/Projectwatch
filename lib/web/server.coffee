@@ -10,7 +10,9 @@ nowjs = require("now")
 
 app = express.createServer()
 
-everyone = nowjs.initialize app
+everyone = nowjs.initialize app,
+  socketio:
+    log: ->
 
 app.set "views", __dirname + "/views"
 console.log "DIR", __dirname

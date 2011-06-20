@@ -18,6 +18,12 @@ class Watcher extends EventEmitter
   constructor: (@name, @cwd, @settings) ->
     super
 
+    if @settings["error.stdout"]?
+      @stdoutError = new RegExp @settings["error.stdout"]
+
+    if @settings["error.stderr"]?
+      @stderrTest = new RegExp @settings["error.stderr"]
+
     @id = @idfy @name
 
     @settings.glob ||= "*"
@@ -80,10 +86,19 @@ class Watcher extends EventEmitter
     cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
       @running = false
 
+      @exitstatus = 0
+
       if err
-        console.log """Error in '#{ @name }'
-          details http://localhost:#{ port }/##{ @id }"""
         @exitstatus = err.code
+      # Fake exitstatus if user supplied testers fail
+      else if @stdoutError and @stdoutError.test @stdout
+        @exitstatus = 1
+      else if @stderrTest and @stderrTest.test @stderr
+        @exitstatus = 1
+
+      if @exitstatus isnt 0
+        console.log "Error in '#{ @name }'
+ details http://localhost:#{ port }/##{ @id }"
       else
         console.log "\nRan", @name, "successfully!\n", (new Date) + 2*60*60
         @exitstatus = 0

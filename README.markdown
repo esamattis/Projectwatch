@@ -28,10 +28,28 @@ files and will start monitors defined in those.
 
 Because shells are intended for a one output only it gets very messy if you
 have several running applications on one shell. That's why Projectwatch comes
-with embedded webserver which provides a HTML based view for your task
-outputs. The view is updated instantly as your tasks are being run.
+with embedded webserver which provides a Webapp for your task viewing task
+statuses outputs. The app view is updated instantly as your tasks are being
+run. It works currently best in Chrome since it has good support for
+WebSockets.
 
 Take a look at a screenshot [here](http://i.imgur.com/WuOad.png).
+
+## Error reporting
+
+Commands that exits with non zero exitstatus are considered failing.
+
+Some times tool creator has not thought through scripting use cases and we
+cannot detect whether the command succeeded. Use can provide your custom
+error checker regexp in projectwatch.cfg
+
+Example:
+
+    error.stdout = error [0-9]+
+
+Would match for "error 4" in the stdout of your command. You can similarly
+define checker for stderr.
+
 
 ## Usage
 
@@ -47,6 +65,9 @@ projectwatch.cfg is an [ini-style][] configuration file.
     watchdir = <directory to be monitored>
     glob = <glob matcher for files to be monitored>
     cmd = <command to be executed on changes>
+    ; Optional settings
+    error.stdout = <regexp>
+    error.stderr = <regexp>
 
 projectwatch.cfg files can have several monitors defined in them.
 
@@ -91,7 +112,5 @@ GNU GENERAL PUBLIC LICENSE Version 3. See LICENCE.txt.
 Todos before 1.0.0
 
 - Use some nice command line option parser
-- Get rid off socket.io logging messages
-- Enable custom error detection
 - Notify about errors using HTML5 desktop notifications
 
