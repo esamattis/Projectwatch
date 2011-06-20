@@ -10,7 +10,7 @@ findit = require "findit"
 iniparser = require "iniparser"
 
 
-port = 8080
+port = 5678
 
 class Watcher extends EventEmitter
 
@@ -78,9 +78,9 @@ class Watcher extends EventEmitter
           details http://localhost:#{ port }/##{ id }"""
         @exitstatus = err.code
       else
+        console.log "\nRan", @name, "successfully!\n", (new Date) + 2*60*60
         @exitstatus = 0
 
-      console.log @name, "Emitting", @exitstatus
       @emit "end", @exitstatus
 
 
@@ -89,8 +89,6 @@ class Watcher extends EventEmitter
         console.log "Rerunning '#{ @name }'"
         @rerun = false
         @runCMD()
-      else
-        console.log "\nRan", @name, "successfully!", (new Date) + 2*60*60
 
 
     cmd.stdout.on "data", (data) =>

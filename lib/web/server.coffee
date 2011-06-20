@@ -51,7 +51,6 @@ exports.registerWatcher = (watcher) ->
   watchers[watcher.name] = watcher
 
   watcher.on "stdout", (data) ->
-    console.log "SENDING", watcher.name
     everyone.now[watcher.name]?.sendStdout(data)
   watcher.on "stderr", (data) ->
     everyone.now[watcher.name]?.sendStderr(data)

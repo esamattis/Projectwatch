@@ -25,13 +25,14 @@ class WatcherRemote extends JQEvenEmitter
     @update options
 
     remote = now[@name] = {}
-    remote.sendStdout = (data) => 
+
+    remote.sendStdout = (data) =>
       @stdout += data
       @emit "update"
-    remote.sendStderr = (data) => 
+    remote.sendStderr = (data) =>
       @stderr += data
       @emit "update"
-    remote.sendStdboth = (data) => 
+    remote.sendStdboth = (data) =>
       @stdboth += data
       @emit "update"
 
@@ -40,6 +41,8 @@ class WatcherRemote extends JQEvenEmitter
       @emit "update"
 
     remote.sendExitStatus = (exitstatus) =>
+      # Emits update
+      console.log "Got exitstatus from server", exitstatus
       @setStatus exitstatus
 
 
@@ -151,7 +154,8 @@ class Notifies
 
 manager = new WatcherManager
 
-now.init = (watchers) ->
+
+now.init = (watchers, cb) ->
   $ ->
     for w in watchers
       manager.createWatcher w
