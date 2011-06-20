@@ -31,7 +31,7 @@ have several running applications on one shell. That's why Projectwatch comes
 with embedded webserver which provides a HTML based view for your task
 outputs. The view is updated instantly as your tasks are being run.
 
-![Projectwatch Web View](http://i.imgur.com/WuOadl.jpg)
+<img src="http://imgur.com/WuOad" alt="Projectwatch Web View" />
 
 ## Usage
 
