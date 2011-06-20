@@ -9,13 +9,16 @@ gex = require "gex"
 findit = require "findit"
 iniparser = require "iniparser"
 
-
 port = 5678
+
+
 
 class Watcher extends EventEmitter
 
   constructor: (@name, @cwd, @settings) ->
     super
+
+    @id = @idfy @name
 
     @settings.glob ||= "*"
     @settings.watchdir ||= "."
@@ -27,6 +30,11 @@ class Watcher extends EventEmitter
     @running = false
     @exitstatus = 0
 
+  idfy: (name) ->
+    # Goofy iding function. Removes bad stuff from name. Nowjs dies if there is
+    # dots in path etc. This should be enough unique. If not, user has way too
+    # similar task names :P
+    safename = name.replace( /[^a-zA-z]/g, "").toLowerCase()
 
 
   resetOutputs: ->
@@ -73,9 +81,8 @@ class Watcher extends EventEmitter
       @running = false
 
       if err
-        id = @name.replace /[^a-zA-z]/g, ""
         console.log """Error in '#{ @name }'
-          details http://localhost:#{ port }/##{ id }"""
+          details http://localhost:#{ port }/##{ @id }"""
         @exitstatus = err.code
       else
         console.log "\nRan", @name, "successfully!\n", (new Date) + 2*60*60

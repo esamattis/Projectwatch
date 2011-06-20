@@ -15,7 +15,7 @@ class WatcherRemote extends JQEvenEmitter
   constructor: (options) ->
     super
     @status = "ok"
-    @id = options.name.replace /[^a-zA-z]/g, ""
+    @id = options.id
     @name = options.name
 
     @lastUpdated = (new Date()).getTime()
@@ -24,7 +24,7 @@ class WatcherRemote extends JQEvenEmitter
     @active = false
     @update options
 
-    remote = now[@name] = {}
+    remote = now[@id] = {}
 
     remote.sendStdout = (data) =>
       @stdout += data
@@ -112,14 +112,14 @@ class WatcherManager
     @watchers = {}
 
   createWatcher: (options) ->
-    if not @watchers[options.name]?
+    if not @watchers[options.id]?
       model = new WatcherRemote options
-      w = @watchers[options.name] = new WatcherView
+      w = @watchers[options.id] = new WatcherView
         model: model
         el: $("<div>").appendTo("body")
       @notifies.add model
     else
-      w = @watchers[options.name]
+      w = @watchers[options.id]
       w.model.update options
 
     w.render()
@@ -131,7 +131,7 @@ class RerunButton
     @el = ops.el
     @watcher = ops.watcher
     @el.click =>
-      now.manualRun @watcher.model.name
+      now.manualRun @watcher.model.id
       false
 
 

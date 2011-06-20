@@ -32,9 +32,10 @@ app.get "/:name", renderApp
 
 everyone.on "connect", ->
   ws = []
-  for name, w of watchers
+  for id, w of watchers
     ws.push
-      name: name
+      id: id
+      name: w.name
       stdout: w.stdout
       stderr: w.stderr
       stdboth: w.stdboth
@@ -43,23 +44,26 @@ everyone.on "connect", ->
   @now.init ws
 
 
-everyone.now.manualRun = (name) ->
-  watcher = watchers[name]
+everyone.now.manualRun = (id) ->
+  watcher = watchers[id]
   watcher.onModified "", true
 
 exports.registerWatcher = (watcher) ->
-  watchers[watcher.name] = watcher
+
+
+  console.log "registering", watcher.id
+  watchers[watcher.id] = watcher
 
   watcher.on "stdout", (data) ->
-    everyone.now[watcher.name]?.sendStdout(data)
+    everyone.now[watcher.id]?.sendStdout(data)
   watcher.on "stderr", (data) ->
-    everyone.now[watcher.name]?.sendStderr(data)
+    everyone.now[watcher.id]?.sendStderr(data)
   watcher.on "stdboth", (data) ->
-    everyone.now[watcher.name]?.sendStdboth(data)
+    everyone.now[watcher.id]?.sendStdboth(data)
   watcher.on "start", (data) ->
-    everyone.now[watcher.name]?.sendReset()
+    everyone.now[watcher.id]?.sendReset()
   watcher.on "end", (exitstatus) ->
-    everyone.now[watcher.name]?.sendExitStatus exitstatus
+    everyone.now[watcher.id]?.sendExitStatus exitstatus
 
 
 exports.start = (port=8080) ->
