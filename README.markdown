@@ -3,7 +3,7 @@
 
 Projectwatch is a tool for automating various tasks in software projects. Such
 as running tests, preprocessing CSS/JS or running code quality checks (eg.
-jslint) etc. Task are run when a change is detected in the files belonging to
+jslint) etc. Tasks are run when a change is detected in the files belonging to
 the task.
 
 A task is defined in projectwatch.cfg file that you put somewhere in your
@@ -24,13 +24,13 @@ and now command
 
 will find it and starts the monitor defined in it.
 
-## Webserver
+## Web app
 
 Because shells are intended for a one output only, it gets very messy if you
 have several running applications on one shell. That's why Projectwatch comes
-with embedded webserver which provides a Webapp for viewing task statuses. The
+with embedded webserver which provides a web app for viewing task statuses. The
 app view is updated instantly as your tasks are being run. It works currently
-best in Chrome since it has good support for WebSockets.
+best in Chrome since it has the best support for WebSockets.
 
 Take a look at a screenshot [here](http://i.imgur.com/WuOad.png).
 
@@ -39,7 +39,7 @@ Take a look at a screenshot [here](http://i.imgur.com/WuOad.png).
 Commands that exits with non zero exitstatus are considered failing.
 
 Some times tool creator has not thought through scripting use cases and we
-cannot detect whether the command succeeded. Use can provide your custom
+cannot detect whether the command succeeded. You can provide your custom
 error checker regexp in projectwatch.cfg
 
 Example:
@@ -68,8 +68,8 @@ projectwatch.cfg is an [ini-style][] configuration file.
     error.stdout = <regexp>
     error.stderr = <regexp>
 
-projectwatch.cfg files can have several monitors defined in them.  The command
-will have the directory of projectwatch.cfg as it's current working directory.
+projectwatch.cfg files can have several monitors defined in them.  The cmd will
+have the directory of projectwatch.cfg as it's current working directory.
 
 
 ## Installation
@@ -113,4 +113,5 @@ Todos before 1.0.0
 
 - Use some nice command line option parser
 - Notify about errors using HTML5 desktop notifications
+- Show current status of the task in web app (running/idle).
 
