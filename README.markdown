@@ -1,14 +1,15 @@
 
 # Projectwatch
 
-As CSS and Javascript pre-processors have gained popularity, need for various
-file change watcher processes has increased. You may now have watchers for Sass,
-CoffeeScript, lints, tests etc. Projectwatch aims to be one language
-independent solution for all of those.
+Projectwatch is a tool for automating various tasks in software projects. Such
+as running tests, preprocessing CSS/JS or running code quality checks (eg.
+jslint) etc. Task are run when a change is detected in the files belonging to
+the task.
 
-You use it by defining a projectwatch.cfg file(s) to your project directories.
-In the file you define what files should be monitored and what command should
-be executed when a change is detected.
+A task is defined in projectwatch.cfg file that you put somewhere in your
+project folder tree structure. You can put several tasks in a one file and you
+can have several projectwatch.cfg files in your project. Projectwatch will
+search all the projectwatch.cfg files and starts corresponding monitors.
 
 Here's an example file
 
@@ -21,17 +22,15 @@ and now command
 
     projectwatch path/to/my/project
 
-will go through every directory of your project looking for projectwatch.cfg
-files and will start monitors defined in those.
+will find it and starts the monitor defined in it.
 
 ## Webserver
 
-Because shells are intended for a one output only it gets very messy if you
+Because shells are intended for a one output only, it gets very messy if you
 have several running applications on one shell. That's why Projectwatch comes
-with embedded webserver which provides a Webapp for your task viewing task
-statuses outputs. The app view is updated instantly as your tasks are being
-run. It works currently best in Chrome since it has good support for
-WebSockets.
+with embedded webserver which provides a Webapp for viewing task statuses. The
+app view is updated instantly as your tasks are being run. It works currently
+best in Chrome since it has good support for WebSockets.
 
 Take a look at a screenshot [here](http://i.imgur.com/WuOad.png).
 
@@ -47,7 +46,7 @@ Example:
 
     error.stdout = error [0-9]+
 
-Would match for "error 4" in the stdout of your command. You can similarly
+Would match for "error 4" in the stdout of your command. You can similar
 define checker for stderr.
 
 
@@ -69,7 +68,8 @@ projectwatch.cfg is an [ini-style][] configuration file.
     error.stdout = <regexp>
     error.stderr = <regexp>
 
-projectwatch.cfg files can have several monitors defined in them.
+projectwatch.cfg files can have several monitors defined in them.  The command
+will have the directory of projectwatch.cfg as it's current working directory.
 
 
 ## Installation
