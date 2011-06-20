@@ -42,6 +42,8 @@ everyone.on "connect", ->
       stderr: w.stderr
       stdboth: w.stdboth
       exitstatus: w.exitstatus
+      cmd: w.settings.cmd
+      cfgfile: "#{ w.settings.watchdir }/projectwatch.cfg"
 
   @now.init ws
 

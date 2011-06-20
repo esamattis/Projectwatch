@@ -17,6 +17,8 @@ class WatcherRemote extends JQEvenEmitter
     @status = "ok"
     @id = options.id
     @name = options.name
+    @cmd = options.cmd
+    @cfgfile = options.cfgfile
 
     @lastUpdated = (new Date()).getTime()
     @on "update", => @lastUpdated = (new Date()).getTime()

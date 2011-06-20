@@ -53,7 +53,8 @@ class Watcher extends EventEmitter
 
     watch.createMonitor @settings.watchdir, (monitor) =>
 
-      console.log "Found watch '#{ @name }' from directory #{ @settings.watchdir }"
+      console.log "Starting watch '#{ @name }'
+ from directory #{ @settings.watchdir }/projectwatch.cfg"
 
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)

@@ -44,6 +44,9 @@ html
           span.timer
 
         .output(class="{{#if active}}active{{/if}}")
+          p Task definition: {{ cfgfile }}
+          h4 CMD
+          pre {{ cmd }}
           h3 STDOUT
           pre {{ stdout }}
           h3 STDERR
