@@ -17,6 +17,7 @@
         , "underscore": ""
         , "gex": ""
         , "express": ""
+        , "express-share": ">= 0.1.1"
         , "jade": ""
         , "now": ""
     }
