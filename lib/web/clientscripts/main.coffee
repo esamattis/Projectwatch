@@ -87,13 +87,20 @@ class WatcherView
   render: ->
     @el.html @template @model
 
+    @button = new RerunButton
+      el: @el.find("button")
+      watcher: @
+
   show: ->
     @model.active = true
-    @model.emit "update"
+    @render()
     @el.get(0).scrollIntoView(true)
   hide: ->
     @model.active = false
-    @model.emit "update"
+    @render()
+
+
+
 
 class WatcherManager
 
@@ -113,6 +120,17 @@ class WatcherManager
       w.model.update options
 
     w.render()
+
+
+class RerunButton
+
+  constructor: (ops) ->
+    @el = ops.el
+    @watcher = ops.watcher
+    @el.click =>
+      now.manualRun @watcher.model.name
+      false
+
 
 class Notifies
 

@@ -44,13 +44,14 @@ class Watcher extends EventEmitter
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)
 
-  onModified: (filepath) ->
+  onModified: (filepath, manual=false) ->
 
-    for match in @settings.glob.split(" ")
-      if gex(match).on path.basename filepath
-        ok = true
-        break
-    return unless ok
+    if not manual
+      for match in @settings.glob.split(" ")
+        if gex(match).on path.basename filepath
+          ok = true
+          break
+      return unless ok
 
 
     # Oh we are already running. Just request restart for this change.

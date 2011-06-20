@@ -42,6 +42,11 @@ everyone.on "connect", ->
 
   @now.init ws
 
+
+everyone.now.manualRun = (name) ->
+  watcher = watchers[name]
+  watcher.onModified "", true
+
 exports.registerWatcher = (watcher) ->
   watchers[watcher.name] = watcher
 
@@ -56,6 +61,7 @@ exports.registerWatcher = (watcher) ->
     everyone.now[watcher.name]?.sendReset()
   watcher.on "end", (exitstatus) ->
     everyone.now[watcher.name]?.sendExitStatus exitstatus
+
 
 exports.start = (port=8080) ->
   app.listen port
