@@ -12,7 +12,7 @@
     , "dependencies": {
         "coffee-script": ""
         , "watch": ""
-        , "findit": ""
+        , "walker": ""
         , "iniparser": ""
         , "underscore": ""
         , "gex": ""

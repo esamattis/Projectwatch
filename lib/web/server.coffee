@@ -41,7 +41,7 @@ everyone.on "connect", ->
       stdout: w.stdout
       stderr: w.stderr
       stdboth: w.stdboth
-      exitstatus: w.exitstatus
+      status: w.status
       cmd: w.settings.cmd
       cfgfile: "#{ w.settings.watchdir }/projectwatch.cfg"
 
@@ -54,8 +54,6 @@ everyone.now.manualRun = (id) ->
 
 exports.registerWatcher = (watcher) ->
 
-
-  console.log "registering", watcher.id
   watchers[watcher.id] = watcher
 
   watcher.on "stdout", (data) ->
@@ -64,10 +62,10 @@ exports.registerWatcher = (watcher) ->
     everyone.now[watcher.id]?.sendStderr(data)
   watcher.on "stdboth", (data) ->
     everyone.now[watcher.id]?.sendStdboth(data)
-  watcher.on "start", (data) ->
+  watcher.on "running", (data) ->
     everyone.now[watcher.id]?.sendReset()
-  watcher.on "end", (exitstatus) ->
-    everyone.now[watcher.id]?.sendExitStatus exitstatus
+  watcher.on "status", (status) ->
+    everyone.now[watcher.id]?.sendStatus status
 
 
 exports.start = (port=8080) ->

@@ -14,7 +14,8 @@ class WatcherRemote extends JQEvenEmitter
 
   constructor: (options) ->
     super
-    @status = "ok"
+    console.log "init status", options.status
+    @status = options.status
     @id = options.id
     @name = options.name
     @cmd = options.cmd
@@ -42,19 +43,12 @@ class WatcherRemote extends JQEvenEmitter
       @reset()
       @emit "update"
 
-    remote.sendExitStatus = (exitstatus) =>
+    remote.sendStatus = (status) =>
       # Emits update
-      console.log "Got exitstatus from server", exitstatus, @id
-      @setStatus exitstatus
-
-
-  setStatus: (exitstatus) ->
-      # Blueprint classes
-      if exitstatus is 0
-        @status = "success"
-      else
-        @status = "error"
+      console.log "Got status from server", status, @id
+      @status = status
       @emit "update"
+
 
   reset: ->
     @stdout = ""
@@ -65,8 +59,9 @@ class WatcherRemote extends JQEvenEmitter
     @stdout = data.stdout
     @stderr = data.stderr
     @stdboth = data.stdboth
-    # This will emit update
-    @setStatus data.exitstatus
+    console.log "update status", data.status
+    @status = data.status
+    @emit "update"
 
 class WatcherView
 

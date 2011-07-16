@@ -3,10 +3,10 @@ path = require "path"
 fs = require "fs"
 { EventEmitter } = require 'events'
 {exec} = require "child_process"
+walker = require "walker"
 
 watch = require "watch"
 gex = require "gex"
-findit = require "findit"
 iniparser = require "iniparser"
 
 port = 5678
@@ -35,6 +35,7 @@ class Watcher extends EventEmitter
     @rerun = false
     @running = false
     @exitstatus = 0
+    @status = "start"
 
   idfy: (name) ->
     # Goofy iding function. Removes bad stuff from name. Nowjs dies if there is
@@ -59,6 +60,10 @@ class Watcher extends EventEmitter
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)
 
+  emitStatus: (status) ->
+    @status = status
+    @emit "status", @status
+
   onModified: (filepath, manual=false) ->
 
     if not manual
@@ -71,6 +76,8 @@ class Watcher extends EventEmitter
 
     # Oh we are already running. Just request restart for this change.
     if @running
+      console.log "Marking rerun because #{ filepath } changed"
+      @emitStatus "rerun"
       @rerun = true
     else
       @runCMD()
@@ -81,9 +88,8 @@ class Watcher extends EventEmitter
   runCMD: ->
 
     @resetOutputs()
-    @emit "start"
-
     @running = true
+    @emitStatus "running"
     cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
       @running = false
 
@@ -98,13 +104,15 @@ class Watcher extends EventEmitter
         @exitstatus = 1
 
       if @exitstatus isnt 0
+        @emitStatus "error"
         console.log "Error in '#{ @name }'
  details http://localhost:#{ port }/##{ @id }"
       else
         console.log "\nRan", @name, "successfully!\n", (new Date) + 2*60*60
         @exitstatus = 0
+        @emitStatus "success"
 
-      @emit "end", @exitstatus
+
 
 
       if @rerun
@@ -137,7 +145,7 @@ exports.run = ->
   console.log "Searching projectwatch.cfg files from #{ dirs }\n"
 
   for searchDir in dirs
-    finder = findit.find(searchDir)
+    finder = walker searchDir
     finder.on "file", (filepath) ->
       if path.basename(filepath) is "projectwatch.cfg"
           iniparser.parse filepath, (err, settingsObs) ->
