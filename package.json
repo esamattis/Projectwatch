@@ -3,6 +3,10 @@
     , "version": "0.3.0"
     , "author": "Esa-Matti Suuronen"
     , "homepage": "https://github.com/epeli/Projectwatch"
+    , "description": "Automatic test and preprocessor runner."
+    , "bugs": {
+        "web": "https://github.com/epeli/Projectwatch/issues/"
+    }
     , "repository":
         { "type": "git"
         , "url": "git://github.com/epeli/Projectwatch.git"

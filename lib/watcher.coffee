@@ -102,12 +102,11 @@ class Watcher extends EventEmitter
 
       if @exitstatus isnt 0
         @emitStatus "error"
-        console.log "Error in '#{ @name }'
- details http://localhost:#{ port }/##{ @id }"
+        console.log "Error in #{ @name }"
       else
-        console.log "\nRan", @name, "successfully!\n", (new Date) + 2*60*60
-        @exitstatus = 0
         @emitStatus "success"
+        console.log "Ran", @name, "successfully! ", (new Date) + 2*60*60
+        @exitstatus = 0
 
 
 
@@ -151,5 +150,5 @@ exports.searchAndWatch = (dirs, options) ->
 
                 webserver.registerWatcher watcher
 
-    webserver.start(options.port)
+    webserver.start(options.port, options.host)
 

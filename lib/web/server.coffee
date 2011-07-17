@@ -67,7 +67,7 @@ exports.registerWatcher = (watcher) ->
     everyone.now[watcher.id]?.sendStatus status
 
 
-exports.start = (port=8080) ->
-  app.listen port
-  console.log  "Listening on  http://localhost:#{ port }/"
+exports.start = (port, host) ->
+  app.listen port, host
+  console.log  "Listening on  http://#{ host }:#{ port }/"
 

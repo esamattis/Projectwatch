@@ -2,7 +2,7 @@
 path = require "path"
 fs = require "fs"
 
-cli = require('cli').enable("version")
+cli = require 'cli'
 
 watcher = require __dirname + "/lib/watcher"
 
@@ -13,8 +13,15 @@ cli.parse
 
 
 showVersion = ->
-  data = JSON.parse fs.readFileSync(__dirname + "/package.json").toString()
-  console.log "Current version is #{ data.version }"
+  package = JSON.parse fs.readFileSync(__dirname + "/package.json").toString()
+  console.log """
+  Projectwatch v#{ package.version }
+
+  #{ package.description }
+
+  Homepage: #{ package.homepage }
+  Bugs: #{ package.bugs.web }
+  """
 
 exports.run = ->
   cli.main (dirs, options) ->
