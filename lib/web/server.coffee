@@ -15,7 +15,6 @@ everyone = nowjs.initialize app,
     log: ->
 
 app.set "views", __dirname + "/views"
-console.log "DIR", __dirname
 
 app.use express.static(__dirname + "/public")
 app.set "clientscripts", __dirname + "/clientscripts"

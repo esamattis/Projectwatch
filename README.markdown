@@ -111,7 +111,5 @@ GNU GENERAL PUBLIC LICENSE Version 3. See LICENCE.txt.
 
 Todos before 1.0.0
 
-- Use some nice command line option parser
 - Notify about errors using HTML5 desktop notifications
-- Show current status of the task in web app (running/idle).
 

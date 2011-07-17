@@ -3,15 +3,13 @@ path = require "path"
 fs = require "fs"
 { EventEmitter } = require 'events'
 {exec} = require "child_process"
-walker = require "walker"
-
 watch = require "watch"
+
 gex = require "gex"
+walker = require "walker"
 iniparser = require "iniparser"
 
-port = 5678
-
-
+webserver = require __dirname + "/web/server"
 
 class Watcher extends EventEmitter
 
@@ -41,7 +39,7 @@ class Watcher extends EventEmitter
     # Goofy iding function. Removes bad stuff from name. Nowjs dies if there is
     # dots in path etc. This should be enough unique. If not, user has way too
     # similar task names :P
-    safename = name.replace( /[^a-zA-z]/g, "").toLowerCase()
+    safename = name.replace(/[^a-zA-z]/g, "").toLowerCase()
 
 
   resetOutputs: ->
@@ -54,8 +52,7 @@ class Watcher extends EventEmitter
 
     watch.createMonitor @settings.watchdir, (monitor) =>
 
-      console.log "Starting watch '#{ @name }'
- from directory #{ @settings.watchdir }/projectwatch.cfg"
+      console.log "Starting watch '#{ @name }' from directory #{ @settings.watchdir }/projectwatch.cfg"
 
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)
@@ -135,31 +132,24 @@ class Watcher extends EventEmitter
       @emit "stdboth", data.toString()
 
 
-webserver = require __dirname + "/web/server.coffee"
 
-exports.run = ->
+exports.searchAndWatch = (dirs, options) ->
+    dirs.push process.cwd() unless dirs.length
 
-  dirs = process.argv.splice(2)
-  dirs.push process.cwd() unless dirs.length
+    console.log "Searching projectwatch.cfg files from #{ dirs }\n"
 
-  console.log "Searching projectwatch.cfg files from #{ dirs }\n"
+    for searchDir in dirs
+      finder = walker searchDir
+      finder.on "file", (filepath) ->
+        if path.basename(filepath) is "projectwatch.cfg"
+            iniparser.parse filepath, (err, settingsObs) ->
+              throw err if err
+              for name, settings of settingsObs
+                watcher = new Watcher name, path.dirname(filepath), settings
+                watcher.start()
+                watcher.runCMD()
 
-  for searchDir in dirs
-    finder = walker searchDir
-    finder.on "file", (filepath) ->
-      if path.basename(filepath) is "projectwatch.cfg"
-          iniparser.parse filepath, (err, settingsObs) ->
-            throw err if err
-            for name, settings of settingsObs
-              watcher = new Watcher name, path.dirname(filepath), settings
-              watcher.start()
-              watcher.runCMD()
+                webserver.registerWatcher watcher
 
-              webserver.registerWatcher watcher
-
-  webserver.start(port)
-
-
-
-
+    webserver.start(options.port)
 

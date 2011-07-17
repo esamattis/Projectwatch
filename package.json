@@ -1,6 +1,6 @@
 {
     "name" : "projectwatch"
-    , "version": "0.2.1"
+    , "version": "0.3"
     , "author": "Esa-Matti Suuronen"
     , "homepage": "https://github.com/epeli/Projectwatch"
     , "repository":
@@ -20,5 +20,6 @@
         , "express-share": ">= 0.1.1"
         , "jade": ""
         , "now": ""
+        , "cli": ""
     }
 }
