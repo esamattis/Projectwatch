@@ -54,11 +54,11 @@ define checker for stderr.
 
     projectwatch [dir1[,dir2[,...]]]
 
-Options:
-  -p, --port [NUMBER]    Listen on this port (Default is 1234)
-  -l, --host [STRING]    Listen to a host (Default is 127.0.0.1)
-  -v, --version          Show version
-  -h, --help             Display help and usage details
+    Options:
+      -p, --port [NUMBER]    Listen on this port (Default is 1234)
+      -l, --host [STRING]    Listen to a host (Default is 127.0.0.1)
+      -v, --version          Show version
+      -h, --help             Display help and usage details
 
 Without parameters projectwatch will start searching from current working directory.
 
