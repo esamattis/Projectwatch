@@ -118,4 +118,15 @@ GNU GENERAL PUBLIC LICENSE Version 3. See LICENCE.txt.
 Todos before 1.0.0
 
 - Notify about errors using HTML5 desktop notifications
+- Add disable run on watch found cli option
+- Add disable watch button to the web app
+- Add cmd.onerror to projectwatch.cfg
+- Document interval option
+- Add options for handling change when cmd is already running. Schedule rerun
+  or kill and rerun.
+
+
+
+
+
 
