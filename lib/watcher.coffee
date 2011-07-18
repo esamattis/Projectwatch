@@ -16,6 +16,8 @@ class Watcher extends EventEmitter
   constructor: (@name, @cwd, @settings) ->
     super
 
+    console.log "Found watch '#{ @name }' from #{ @cwd }/projectwatch.cfg"
+
     if @settings["error.stdout"]?
       @stdoutError = new RegExp @settings["error.stdout"]
 
@@ -27,7 +29,6 @@ class Watcher extends EventEmitter
     @settings.glob ||= "*"
     @settings.watchdir ||= "."
     @settings.interval ||= 0
-    console.log "interval is #{ @settings.interval } for #{ @name }"
 
     if @settings.watchdir.substr(0,1) isnt "/"
       @settings.watchdir = path.join(@cwd, @settings.watchdir)
@@ -55,7 +56,6 @@ class Watcher extends EventEmitter
 
     watch.createMonitor @settings.watchdir, (monitor) =>
 
-      console.log "Starting watch '#{ @name }' from directory #{ @settings.watchdir }/projectwatch.cfg"
 
       monitor.on "created", (file) => @onModified(file)
       monitor.on "changed", (file) => @onModified(file)
@@ -66,8 +66,6 @@ class Watcher extends EventEmitter
 
   onModified: (filepath, manual=false) ->
 
-    console.log "Change on '#{ filepath }' running '#{ @name }'!"
-
     if not manual
       for match in @settings.glob.split(" ")
         if gex(match).on path.basename filepath
@@ -76,15 +74,15 @@ class Watcher extends EventEmitter
       return unless ok
 
       timeSinceLastrun = ((new Date()).getTime() - @lastRunTimeStamp) / 1000 / 60
-      console.log "DIFF #{ @settings.interval - timeSinceLastrun }"
       if timeSinceLastrun < @settings.interval
-        console.log "Change but interval is not due yet. #{ @settings.interval - timeSinceLastrun } minutes left"
+        console.log "#{ @name } got change on #{ filepath }, but interval is not due yet. #{ @settings.interval - timeSinceLastrun } minutes left"
         return
-
+    else
+      console.log "#{ @name } got change on #{ filepath }"
 
     # Oh we are already running. Just request restart for this change.
     if @running
-      console.log "Marking rerun because #{ filepath } changed"
+      console.log "Marking #{ @name } for rerun because because it is already running"
       @emitStatus "rerun"
       @rerun = true
     else
@@ -93,13 +91,14 @@ class Watcher extends EventEmitter
 
 
   runCMD: ->
+    console.log "Running #{ @name }"
 
     @resetOutputs()
     @running = true
     @emitStatus "running"
+    @lastRunTimeStamp = (new Date()).getTime()
     cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
       @running = false
-      @lastRunTimeStamp = (new Date()).getTime()
 
       @exitstatus = 0
 
@@ -113,10 +112,10 @@ class Watcher extends EventEmitter
 
       if @exitstatus isnt 0
         @emitStatus "error"
-        console.log "Error in #{ @name }"
+        console.log "Failed to run #{ @name }"
       else
         @emitStatus "success"
-        console.log "Ran", @name, "successfully! ", (new Date) + 2*60*60
+        console.log "Ran", @name, "successfully! "
         @exitstatus = 0
 
 
