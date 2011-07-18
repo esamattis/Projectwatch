@@ -26,10 +26,13 @@ class Watcher extends EventEmitter
 
     @settings.glob ||= "*"
     @settings.watchdir ||= "."
+    @settings.interval ||= 0
+    console.log "interval is #{ @settings.interval } for #{ @name }"
 
     if @settings.watchdir.substr(0,1) isnt "/"
       @settings.watchdir = path.join(@cwd, @settings.watchdir)
 
+    @lastRunTimeStamp = 0
     @rerun = false
     @running = false
     @exitstatus = 0
@@ -63,12 +66,20 @@ class Watcher extends EventEmitter
 
   onModified: (filepath, manual=false) ->
 
+    console.log "Change on '#{ filepath }' running '#{ @name }'!"
+
     if not manual
       for match in @settings.glob.split(" ")
         if gex(match).on path.basename filepath
           ok = true
           break
       return unless ok
+
+      timeSinceLastrun = ((new Date()).getTime() - @lastRunTimeStamp) / 1000 / 60
+      console.log "DIFF #{ @settings.interval - timeSinceLastrun }"
+      if timeSinceLastrun < @settings.interval
+        console.log "Change but interval is not due yet. #{ @settings.interval - timeSinceLastrun } minutes left"
+        return
 
 
     # Oh we are already running. Just request restart for this change.
@@ -80,7 +91,6 @@ class Watcher extends EventEmitter
       @runCMD()
 
 
-    console.log "Change on '#{ filepath }' running '#{ @name }'!"
 
   runCMD: ->
 
@@ -89,6 +99,7 @@ class Watcher extends EventEmitter
     @emitStatus "running"
     cmd = exec @settings.cmd,  cwd: @cwd, (err) =>
       @running = false
+      @lastRunTimeStamp = (new Date()).getTime()
 
       @exitstatus = 0
 

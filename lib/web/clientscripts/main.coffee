@@ -1,3 +1,4 @@
+$ = jQuery
 
 class JQEvenEmitter
   constructor: -> @_jq = jQuery {}
@@ -171,6 +172,10 @@ now.init = (watchers, cb) ->
 
 
 
-
+jQuery ($) ->
+  $("a").live "click", (e) ->
+    if $(this).attr("href") is window.location.hash
+      window.location.hash = ""
+      e.preventDefault()
 
 
