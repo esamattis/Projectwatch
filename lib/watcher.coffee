@@ -10,6 +10,7 @@ walker = require "walker"
 iniparser = require "iniparser"
 
 webserver = require __dirname + "/web/server"
+prompt = require __dirname + "/prompt"
 
 class Watcher extends EventEmitter
 
@@ -112,10 +113,16 @@ class Watcher extends EventEmitter
 
       if @exitstatus isnt 0
         @emitStatus "error"
+
+        prompt.setColor "red"
         console.log "Failed to run #{ @name }"
+        prompt.resetColor()
+
       else
         @emitStatus "success"
+        prompt.setColor "green"
         console.log "Ran", @name, "successfully! "
+        prompt.resetColor()
         @exitstatus = 0
 
 
