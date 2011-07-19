@@ -129,6 +129,7 @@ class RerunButton
     @el = ops.el
     @watcher = ops.watcher
     @el.click =>
+      @watcher.model.reset()
       now.manualRun @watcher.model.id
       false
 
