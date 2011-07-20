@@ -171,7 +171,8 @@ now.init = (watchers, cb) ->
     $(window).bind "hashchange", activateWatcherByHash
     activateWatcherByHash()
 
-
+$(window).bind "beforeunload", (e) ->
+  "You will stop getting notifications of errors if you close this window."
 
 jQuery ($) ->
   $("a").live "click", (e) ->
