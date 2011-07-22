@@ -37,6 +37,7 @@ class Watcher extends EventEmitter
     @lastRunTimeStamp = 0
     @rerun = false
     @running = false
+    @timer = null
     @exitstatus = 0
     @status = "start"
 
@@ -77,6 +78,15 @@ class Watcher extends EventEmitter
       timeSinceLastrun = ((new Date()).getTime() - @lastRunTimeStamp) / 1000 / 60
       if timeSinceLastrun < @settings.interval
         console.log "#{ @name } got change on #{ filepath }, but interval is not due yet. #{ @settings.interval - timeSinceLastrun } minutes left"
+
+        if not @timer
+          console.log "Setting timer", @name
+          @timer = setTimeout =>
+            console.log "Manual run from timer", @name
+            @onModified filepath, True
+            @timer = null
+          , @settings.interval * 60 * 1000
+
         return
     else
       console.log "#{ @name } got change on #{ filepath }"
