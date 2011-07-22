@@ -66,27 +66,33 @@ class Watcher extends EventEmitter
     @status = status
     @emit "status", @status
 
+  matches: (filepath) ->
+    for match in @settings.glob.split(" ")
+      if gex(match).on path.basename filepath
+        return true
+    false
+
+  delayedRun: (filepath) ->
+    if not @timer
+      console.log "Setting timer", @name
+      @timer = setTimeout =>
+        console.log "Manual run from timer", @name
+        @onModified filepath, true
+        @timer = null
+      , @settings.interval * 60 * 1000
+
+
+  hasTimeoutPassed: ->
+    timeSinceLastrun = ((new Date()).getTime() - @lastRunTimeStamp) / 1000 / 60
+    timeSinceLastrun > @settings.interval
+
   onModified: (filepath, manual=false) ->
 
     if not manual
-      for match in @settings.glob.split(" ")
-        if gex(match).on path.basename filepath
-          ok = true
-          break
-      return unless ok
-
-      timeSinceLastrun = ((new Date()).getTime() - @lastRunTimeStamp) / 1000 / 60
-      if timeSinceLastrun < @settings.interval
-        console.log "#{ @name } got change on #{ filepath }, but interval is not due yet. #{ @settings.interval - timeSinceLastrun } minutes left"
-
-        if not @timer
-          console.log "Setting timer", @name
-          @timer = setTimeout =>
-            console.log "Manual run from timer", @name
-            @onModified filepath, True
-            @timer = null
-          , @settings.interval * 60 * 1000
-
+      return unless @matches filepath
+      if not @hasTimeoutPassed()
+        console.log "Cannot run #{ @name } yet, time out has not passed"
+        @delayedRun filepath
         return
     else
       console.log "#{ @name } got change on #{ filepath }"
