@@ -1,6 +1,8 @@
 
 # Projectwatch
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/epeli/Projectwatch.svg)](https://greenkeeper.io/)
+
 Projectwatch is a tool for automating various tasks in software projects. Such
 as running tests, preprocessing CSS/JS or running code quality checks (eg.
 jslint) etc. Tasks are run when a change is detected in the files belonging to
